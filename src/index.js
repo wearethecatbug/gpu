@@ -1,6 +1,8 @@
 const {
 	_create,
 	renderGPUDeviceToWindow,
+	getDevicePointer,
+	getQueuePointer,
 	globals,
 } = require('../dist/dawn.node')
 
@@ -32,5 +34,7 @@ module.exports = {
 	create,
 	destroy,
 	renderGPUDeviceToWindow,
+	getDevicePointer,
+	getQueuePointer,
 	...globals,
 }

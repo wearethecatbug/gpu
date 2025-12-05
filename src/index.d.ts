@@ -3088,6 +3088,24 @@ interface WebGPU {
     presentMode?: PresentMode,
   }): Renderer
   destroy(gpu: GPU)
+
+  /**
+   * Extract the native WGPUDevice pointer from a GPUDevice.
+   * Returns an opaque External that can be passed to other N-API addons.
+   * 
+   * @param device - The GPUDevice object
+   * @returns An opaque handle to the native WGPUDevice
+   */
+  getDevicePointer(device: GPUDevice): unknown
+
+  /**
+   * Extract the native WGPUQueue pointer from a GPUDevice.
+   * Returns an opaque External that can be passed to other N-API addons.
+   * 
+   * @param device - The GPUDevice object (queue is obtained from device)
+   * @returns An opaque handle to the native WGPUQueue
+   */
+  getQueuePointer(device: GPUDevice): unknown
 }
 
 declare const gpu: WebGPU

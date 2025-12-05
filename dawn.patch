@@ -453,6 +453,46 @@ index cb70833c..220e420e 100644
 +    }
 +
 +    return Renderer::NewInstance(env, jsDevice, jsWindow, jsPresentMode);
++}
++
++// ============================================================================
++// Device/Queue pointer extraction for external native addons (e.g., Effekseer)
++// ============================================================================
++
++Napi::Value GetDevicePointer(const Napi::CallbackInfo& info) {
++    const Napi::Env& env = info.Env();
++
++    if (info.Length() != 1 || !info[0].IsObject()) {
++        Napi::Error::New(env, "getDevicePointer expects a GPUDevice object").ThrowAsJavaScriptException();
++        return env.Undefined();
++    }
++
++    Napi::Object jsDevice = info[0].As<Napi::Object>();
++    WGPUDevice wgpuDevice = reinterpret_cast<wgpu::binding::GPUDevice*>(
++        wgpu::interop::GPUDevice::Unwrap(jsDevice)
++    )->device_.Get();
++
++    // Return as External (void pointer that can be passed to other N-API addons)
++    return Napi::External<void>::New(env, wgpuDevice);
++}
++
++Napi::Value GetQueuePointer(const Napi::CallbackInfo& info) {
++    const Napi::Env& env = info.Env();
++
++    if (info.Length() != 1 || !info[0].IsObject()) {
++        Napi::Error::New(env, "getQueuePointer expects a GPUDevice object").ThrowAsJavaScriptException();
++        return env.Undefined();
++    }
++
++    Napi::Object jsDevice = info[0].As<Napi::Object>();
++    WGPUDevice wgpuDevice = reinterpret_cast<wgpu::binding::GPUDevice*>(
++        wgpu::interop::GPUDevice::Unwrap(jsDevice)
++    )->device_.Get();
++
++    WGPUQueue wgpuQueue = procs->deviceGetQueue(wgpuDevice);
++
++    // Return as External (void pointer that can be passed to other N-API addons)
++    return Napi::External<void>::New(env, wgpuQueue);
  }
  
  #ifdef DAWN_EMIT_COVERAGE
@@ -474,6 +514,10 @@ index cb70833c..220e420e 100644
 +    Renderer::Init(env);
 +
 +    exports.Set(Napi::String::New(env, "renderGPUDeviceToWindow"), Napi::Function::New<RenderGPUDeviceToWindow>(env));
++
++    // Export device/queue pointer extraction for external native addons
++    exports.Set(Napi::String::New(env, "getDevicePointer"), Napi::Function::New<GetDevicePointer>(env));
++    exports.Set(Napi::String::New(env, "getQueuePointer"), Napi::Function::New<GetQueuePointer>(env));
  
  #ifdef DAWN_EMIT_COVERAGE
      Coverage* coverage = new Coverage();
