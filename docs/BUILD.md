@@ -336,5 +336,24 @@ nativeBinding.initialize(devicePtr, queuePtr);
 ## Related Files
 
 - `artifacts/dawn.node/win32/x64/dawn.node` - Prebuilt binary
+- `references/gpu/dawn-module.patch` - Dawn source modifications (Module.cpp, CMakeLists)
+- `references/gpu/wrapper.patch` - Wrapper (src/index.js) to export our functions
 - `references/gpu/dawn.patch` - Original patch (may not apply cleanly)
 - `packages/platforms/native/src/particles/` - Effekseer integration using these pointers
+
+## Post-Install Step
+
+After `pnpm install` or `npm install`, you need to:
+
+1. Replace `node_modules/@kmamal/gpu/dist/dawn.node` with our custom build
+2. Apply `wrapper.patch` to `node_modules/@kmamal/gpu/src/index.js`
+
+Or use the artifacts:
+```powershell
+# Copy custom dawn.node
+copy artifacts\dawn.node\win32\x64\dawn.node node_modules\@kmamal\gpu\dist\dawn.node
+
+# Apply wrapper patch (or manually add getDevicePointer/getQueuePointer exports)
+cd node_modules\@kmamal\gpu
+git apply ..\..\..\references\gpu\wrapper.patch
+```

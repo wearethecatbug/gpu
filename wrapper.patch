@@ -1,0 +1,19 @@
+--- a/src/index.js
++++ b/src/index.js
+@@ -1,6 +1,8 @@
+ const {
+        _create,
+        renderGPUDeviceToWindow,
++       getDevicePointer,
++       getQueuePointer,
+        globals,
+ } = require('../dist/dawn.node')
+ 
+@@ -29,5 +31,7 @@ module.exports = {
+        create,
+        destroy,
+        renderGPUDeviceToWindow,
++       getDevicePointer,
++       getQueuePointer,
+        ...globals,
+ }
