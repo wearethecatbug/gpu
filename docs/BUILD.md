@@ -130,7 +130,27 @@ rmdir /S /Q package
 
 ### Step 5: Apply Custom Modifications
 
-The patch file `dawn.patch` contains our changes but may not apply cleanly to newer Dawn versions. Instead, manually add these functions to `dawn/src/dawn/node/Module.cpp`:
+We have saved all Dawn modifications in this repository:
+
+- `dawn-changes.patch` - Git patch for modified files (Module.cpp, CMakeLists, etc.)
+- `dawn-additions/` - New files (SDL integration: webgpu_sdl.h, sdl/*.cpp)
+
+**Option A: Apply patches (recommended)**
+
+```powershell
+cd dawn
+
+# Apply modifications to existing files
+git apply ../dawn-changes.patch
+
+# Copy new SDL integration files
+xcopy /E /Y ..\dawn-additions\sdl src\dawn\sdl\
+copy ..\dawn-additions\webgpu_sdl.h include\webgpu\
+```
+
+**Option B: Manual modifications**
+
+If patches don't apply cleanly, manually add these functions to `dawn/src/dawn/node/Module.cpp`:
 
 #### Add getDevicePointer Function
 
