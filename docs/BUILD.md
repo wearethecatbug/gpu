@@ -357,3 +357,46 @@ copy artifacts\dawn.node\win32\x64\dawn.node node_modules\@kmamal\gpu\dist\dawn.
 cd node_modules\@kmamal\gpu
 git apply ..\..\..\references\gpu\wrapper.patch
 ```
+
+## Linux Build (for CI/CD)
+
+### Prerequisites (Ubuntu/Debian)
+
+```bash
+# Build essentials
+sudo apt-get update
+sudo apt-get install -y build-essential cmake ninja-build golang-go python3
+
+# Additional dependencies for Dawn
+sudo apt-get install -y libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+```
+
+### Build Steps
+
+```bash
+cd references/gpu
+
+# Sync Dawn sources
+node scripts/sync.mjs
+
+# Configure and build
+node scripts/configure.mjs
+cd build
+ninja dawn.node
+
+# Copy to artifacts
+mkdir -p ../../../artifacts/dawn.node/linux/x64
+cp dawn.node ../../../artifacts/dawn.node/linux/x64/
+```
+
+### CI/CD Integration
+
+The `tools/scripts/dawn/setup-dawn-node.mjs` helper automatically:
+1. Checks for prebuilt artifacts in `artifacts/dawn.node/<platform>/<arch>/`
+2. Copies to `node_modules/@kmamal/gpu/dist/` if found
+3. Falls back to @kmamal release downloads if not
+
+For CI, either:
+- Pre-populate `artifacts/dawn.node/linux/x64/dawn.node` in the repo
+- Or build as part of CI pipeline and cache the result
+
