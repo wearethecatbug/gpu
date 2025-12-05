@@ -26,14 +26,38 @@ execSync(`git apply --ignore-space-change --ignore-whitespace ${Path.join(C.dir.
 process.chdir(C.dir.dawn)
 console.log("configure build in", C.dir.build)
 
-await Fs.promises.rm(C.dir.build, { recursive: true }).catch(() => {})
+await Fs.promises.rm(C.dir.build, { recursive: true }).catch(() => { })
 await Fs.promises.mkdir(C.dir.build, { recursive: true })
 
 let CFLAGS
 let LDFLAGS
 let crossCompileFlag
 let backendFlags = []
-if (C.platform === 'darwin') {
+let cmakeCompilerFlags = []
+
+// Windows: Use system Ninja and MSVC (don't rely on bundled clang-cl)
+if (C.platform === 'win32') {
+	// Try bundled paths first, fall back to system tools
+	const bundledNinja = Path.join(C.dir.dawn, 'third_party', 'ninja', 'ninja.exe')
+	const bundledClang = Path.join(C.dir.dawn, 'third_party', 'llvm-build', 'Release+Asserts', 'bin', 'clang-cl.exe')
+
+	const useSystemTools = !Fs.existsSync(bundledClang)
+
+	if (useSystemTools) {
+		console.log('Using system Ninja and MSVC (bundled clang-cl not found)')
+		// Let CMake find system cl.exe and ninja - don't set compiler flags
+		// cmake will use the environment from VsDevCmd or find them in PATH
+		cmakeCompilerFlags = []
+	} else {
+		console.log('Using bundled Ninja and clang-cl')
+		cmakeCompilerFlags = [
+			`-DCMAKE_MAKE_PROGRAM="${bundledNinja}"`,
+			`-DCMAKE_C_COMPILER="${bundledClang}"`,
+			`-DCMAKE_CXX_COMPILER="${bundledClang}"`,
+		]
+	}
+}
+else if (C.platform === 'darwin') {
 	let arch = process.env.CROSS_COMPILE_ARCH ?? C.arch
 	if (arch === 'x64') { arch = 'x86_64' }
 
@@ -75,6 +99,7 @@ execSync(`cmake ${[
 	'-DDAWN_ENABLE_SPIRV_VALIDATION=ON',
 	'-DDAWN_ALWAYS_ASSERT=ON',
 	'-DDAWN_FORCE_SYSTEM_COMPONENT_LOAD=ON',
+	...cmakeCompilerFlags,
 	crossCompileFlag,
 	...backendFlags,
 ].filter(Boolean).join(' ')}`, {
