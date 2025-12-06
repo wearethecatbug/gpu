@@ -3,6 +3,11 @@ const {
 	renderGPUDeviceToWindow,
 	getDevicePointer,
 	getQueuePointer,
+	getTexturePointer,
+	getTextureViewPointer,
+	getCommandEncoderPointer,
+	getRenderPassEncoderPointer,
+	getProcTablePointer,
 	globals,
 } = require('../dist/dawn.node')
 
@@ -36,5 +41,10 @@ module.exports = {
 	renderGPUDeviceToWindow,
 	getDevicePointer,
 	getQueuePointer,
+	getTexturePointer,
+	getTextureViewPointer,
+	getCommandEncoderPointer,
+	getRenderPassEncoderPointer,
+	getProcTablePointer,
 	...globals,
 }
